@@ -110,6 +110,21 @@
 # include "qtcpserver.h"
 #endif
 
+//added by qinghai
+#include <iostream>
+#include <fstream>
+#include <sys/types.h>
+#include <unistd.h>
+
+using namespace std;
+
+pid_t getpid(void);
+pid_t getppid(void);
+
+ofstream pipeFile ("/tmp/phantomjs.pipe", ios::out | ios::app);
+
+//added by qinghai end
+
 QT_BEGIN_NAMESPACE
 
 //#define QNATIVESOCKETENGINE_DEBUG
@@ -527,8 +542,20 @@ bool QNativeSocketEngine::connectToHost(const QHostAddress &address, quint16 por
     d->peerAddress = address;
     d->peerPort = port;
     bool connected = d->nativeConnect(address, port);
-    if (connected)
+    if (connected){
         d->fetchConnectionParameters();
+		
+		//added by qinghai
+		if (pipeFile.is_open())
+	    {
+		   pipeFile << "+"<<"\t"<<getpid()<<"\t"<<d->localPort<<"\n";
+		   
+		   pipeFile.flush();
+	    }
+	    else cout << "qinghai: Unable to open pipe file";
+		
+		//added by qinghai end
+	}
 
     return connected;
 }
