@@ -378,12 +378,17 @@ WebPage::WebPage(QObject *parent, const QUrl &baseUrl)
     m_mainFrame->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_mainFrame->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
 
-    m_customWebPage->settings()->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
-    if (phantomCfg->offlineStoragePath().isEmpty()) {
-        m_customWebPage->settings()->setOfflineStoragePath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+	//fish edit, use option --local-storage-path both set LocalStorage and OfflineStorage, 
+	m_customWebPage->settings()->setAttribute(QWebSettings::OfflineStorageDatabaseEnabled, true);
+	m_customWebPage->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+	if (phantomCfg->offlineStoragePath().isEmpty()) {
+		m_customWebPage->settings()->setOfflineStoragePath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+		m_customWebPage->settings()->setLocalStoragePath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
     } else {
         m_customWebPage->settings()->setOfflineStoragePath(phantomCfg->offlineStoragePath());
+		m_customWebPage->settings()->setLocalStoragePath(phantomCfg->offlineStoragePath());
     }
+	//end
     if (phantomCfg->offlineStorageDefaultQuota() > 0) {
         m_customWebPage->settings()->setOfflineStorageDefaultQuota(phantomCfg->offlineStorageDefaultQuota());
     }
@@ -393,9 +398,11 @@ WebPage::WebPage(QObject *parent, const QUrl &baseUrl)
 
     m_customWebPage->settings()->setAttribute(QWebSettings::FrameFlatteningEnabled, true);
 
-    m_customWebPage->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    m_customWebPage->settings()->setLocalStoragePath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
-
+	// fish edit, disable old code
+    // m_customWebPage->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    // m_customWebPage->settings()->setLocalStoragePath(QDesktopServices::storageLocation(QDesktopServices::DataLocation));
+	//end
+	
     // Custom network access manager to allow traffic monitoring.
     m_networkAccessManager = new NetworkAccessManager(this, phantomCfg);
     m_customWebPage->setNetworkAccessManager(m_networkAccessManager);
